@@ -50,7 +50,7 @@ def process_observation(time_step):
     return o_1, r, done
 class Agent(object):
     def __init__(self):
-        from your_sac_file import Pi_FC  # 載入你 SAC 定義的 Actor 類別
+
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
