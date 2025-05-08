@@ -93,7 +93,6 @@ class Agent(object):
         self.actor.eval()
 
     def act(self, observation):
-
         observation = sort_obs(observation)
         obs_tensor = torch.tensor(observation, dtype=torch.float64, device=self.device).unsqueeze(0)
 
