@@ -65,6 +65,16 @@ class Agent(object):
         self.actor.eval()
 
     def act(self, observation):
+        def flatten_observation(observation):
+            o_1 = np.array([])
+            for k in observation:
+                if observation[k].shape:
+                    o_1 = np.concatenate((o_1, observation[k].flatten()))
+                else:
+                    o_1 = np.concatenate((o_1, np.array([observation[k]])))
+            return o_1
+        observation = flatten_observation(observation)
+
         obs_tensor = torch.tensor(observation, dtype=torch.float32, device=self.device).unsqueeze(0)
 
         with torch.no_grad():
