@@ -66,15 +66,15 @@ def sort_obs(o1):
 
     return reordered
 
-def process_observation(observation):
-    o_1 = np.array([])
-    for k in observation:
-        if observation[k].shape:
-            o_1 = np.concatenate((o_1, observation[k].flatten()))
-        else :
-            o_1 = np.concatenate((o_1, np.array([observation[k]])))
-    o_1 = sort_obs(o_1)
-    return o_1
+# def process_observation(observation):
+#     o_1 = np.array([])
+#     for k in observation:
+#         if observation[k].shape:
+#             o_1 = np.concatenate((o_1, observation[k].flatten()))
+#         else :
+#             o_1 = np.concatenate((o_1, np.array([observation[k]])))
+#     o_1 = sort_obs(o_1)
+#     return o_1
 
 class Agent(object):
     def __init__(self):
@@ -94,7 +94,7 @@ class Agent(object):
 
     def act(self, observation):
 
-        observation = process_observation(observation)
+        observation = sort_obs(observation)
         obs_tensor = torch.tensor(observation, dtype=torch.float64, device=self.device).unsqueeze(0)
 
         with torch.no_grad():
