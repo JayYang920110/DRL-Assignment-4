@@ -94,7 +94,7 @@ class Agent(object):
 
     def act(self, observation):
         observation = sort_obs(observation)
-        obs_tensor = torch.tensor(observation, dtype=torch.float64, device=self.device).unsqueeze(0)
+        obs_tensor = torch.tensor(observation, dtype=torch.float32, device=self.device).unsqueeze(0)
 
         with torch.no_grad():
             action, _ = self.actor(obs_tensor, deterministic=True)
