@@ -37,17 +37,45 @@ class Pi_FC(torch.nn.Module):
         return action, log_prob
 
 # Parse observation dictionary returned by Deepmind Control Suite
-def process_observation(time_step):
-    o_1 = np.array([])
-    for k in time_step.observation:
-        if time_step.observation[k].shape:
-            o_1 = np.concatenate((o_1, time_step.observation[k].flatten()))
-        else :
-            o_1 = np.concatenate((o_1, np.array([time_step.observation[k]])))
-    r = time_step.reward
-    done = time_step.last()
+def sort_obs(o1):
+    key_shapes = {
+        'com_velocity': (3,),
+        'extremities': (12,),
+        'head_height': (),
+        'joint_angles': (21,),
+        'torso_vertical': (3,),
+        'velocity': (27,),
+    }
+
+    sorted_keys = ['com_velocity', 'extremities', 'head_height', 'joint_angles', 'torso_vertical', 'velocity']
     
-    return o_1, r, done
+    original_order = ['joint_angles', 'head_height', 'extremities', 'torso_vertical', 'com_velocity', 'velocity']
+
+    # 先建立 sorted_key 下的 slice range
+    key_slices = {}
+    start = 0
+    for k in sorted_keys:
+        length = np.prod(key_shapes[k]) if key_shapes[k] else 1
+        key_slices[k] = (start, start + length)
+        start += length
+
+    reordered = np.array([])
+    for k in original_order:
+        s, e = key_slices[k]
+        reordered = np.concatenate((reordered, o1[s:e]))
+
+    return reordered
+
+def process_observation(observation):
+    o_1 = np.array([])
+    for k in observation:
+        if observation[k].shape:
+            o_1 = np.concatenate((o_1, observation[k].flatten()))
+        else :
+            o_1 = np.concatenate((o_1, np.array([observation[k]])))
+    o_1 = sort_obs(o_1)
+    return o_1
+
 class Agent(object):
     def __init__(self):
 
@@ -65,10 +93,9 @@ class Agent(object):
         self.actor.eval()
 
     def act(self, observation):
-        def flatten_observation(observation):
-            return observation.flatten()
-        observation = flatten_observation(observation)
-        obs_tensor = torch.tensor(observation, dtype=torch.float32, device=self.device).unsqueeze(0)
+
+        observation = process_observation(observation)
+        obs_tensor = torch.tensor(observation, dtype=torch.float64, device=self.device).unsqueeze(0)
 
         with torch.no_grad():
             action, _ = self.actor(obs_tensor, deterministic=True)
